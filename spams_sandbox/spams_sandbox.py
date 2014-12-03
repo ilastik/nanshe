@@ -15,7 +15,7 @@ class SPAMSException(Exception):
 
 
 #@nanshe.advanced_debugging.log_call(logger)
-def run_multiprocessing_queue_spams_trainDL(out_queue, *args, **kwargs):
+def run_multiprocessing_queue_spams_trainDL(queue, *args, **kwargs):
     """
         Designed to run spams.trainDL in a separate process.
 
@@ -29,7 +29,7 @@ def run_multiprocessing_queue_spams_trainDL(out_queue, *args, **kwargs):
 
 
         Args:
-            out_queue(multiprocessing.Queue):       what will take the returned dictionary from spams.trainDL.
+            queue(multiprocessing.Queue):           what will take the returned dictionary from spams.trainDL.
             *args(list):                            a list of position arguments to pass to spams.trainDL.
             *kwargs(dict):                          a dictionary of keyword arguments to pass to spams.trainDL.
 
@@ -43,7 +43,7 @@ def run_multiprocessing_queue_spams_trainDL(out_queue, *args, **kwargs):
     import spams
 
     result = spams.trainDL(*args, **kwargs)
-    out_queue.put(result)
+    queue.put(result)
 
 
 #@nanshe.advanced_debugging.log_call(logger)
@@ -75,11 +75,11 @@ def call_multiprocessing_queue_spams_trainDL(*args, **kwargs):
     # Only necessary for dealing with SPAMS
     import multiprocessing
 
-    out_queue = multiprocessing.Queue()
+    queue = multiprocessing.Queue()
 
-    p = multiprocessing.Process(target = run_multiprocessing_queue_spams_trainDL, args = (out_queue,) + args, kwargs = kwargs)
+    p = multiprocessing.Process(target = run_multiprocessing_queue_spams_trainDL, args = (queue,) + args, kwargs = kwargs)
     p.start()
-    result = out_queue.get()
+    result = queue.get()
     result = result.copy()
     p.join()
 
