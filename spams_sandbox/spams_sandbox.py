@@ -42,12 +42,13 @@ def run_multiprocessing_queue_spams_trainDL(queue, *args, **kwargs):
     # Also, it takes a long time to load this module.
     import spams
 
-    result = spams.trainDL(*args, **kwargs)
+    X = queue.get()
+    result = spams.trainDL(X, *args, **kwargs)
     queue.put(result)
 
 
 #@nanshe.advanced_debugging.log_call(logger)
-def call_multiprocessing_queue_spams_trainDL(*args, **kwargs):
+def call_multiprocessing_queue_spams_trainDL(X, *args, **kwargs):
     """
         Designed to start spams.trainDL in a separate process and handle the result in an unnoticeably different way.
 
@@ -76,6 +77,7 @@ def call_multiprocessing_queue_spams_trainDL(*args, **kwargs):
     import multiprocessing
 
     queue = multiprocessing.Queue()
+    queue.put(X)
 
     p = multiprocessing.Process(target = run_multiprocessing_queue_spams_trainDL, args = (queue,) + args, kwargs = kwargs)
     p.start()
