@@ -432,8 +432,16 @@ def generate_dictionary(new_data, **parameters):
 
     import spams_sandbox
 
-    # Requires double array. Copies input data as well.
-    new_data_processed = new_data.astype(float)
+    float_dtype = numpy.dtype(numpy.float32)
+    float_ctype = ctypes.c_float
+    if issubclass(new_data.dtype.type, numpy.floating):
+        float_dtype = new_data.dtype
+        if float_dtype.itemsize > numpy.dtype(numpy.float32).itemsize:
+            float_dtype = numpy.dtype(numpy.float64)
+            float_ctype = ctypes.c_double
+        else:
+            float_dtype = numpy.dtype(numpy.float32)
+            float_ctype = ctypes.c_float
 
     # Want to support NumPy types in parameters. However, SPAMS expects normal C types. So, we convert them in advance.
     # This was needed for the Ilastik based GUI.
@@ -442,11 +450,14 @@ def generate_dictionary(new_data, **parameters):
         if isinstance(_v, numpy.integer):
             _v = int(_v)
         elif isinstance(_v, numpy.floating):
-            _v = float(_v)
+            _v = float_ctype(_v).value
         elif isinstance(_v, numpy.bool_):
             _v = bool(_v)
 
         parameters["spams.trainDL"][_k] = _v
+
+    # Assign to the processed version.
+    new_data_processed = new_data
 
     # Reshape data into a matrix (each image is now a column vector)
     new_data_processed = expanded_numpy.array_to_matrix(new_data_processed)
@@ -456,10 +467,18 @@ def generate_dictionary(new_data, **parameters):
     # Spams requires all matrices to be fortran.
     new_data_processed = numpy.asfortranarray(new_data_processed)
 
+    # Requires double array. Copies input data as well, which is required due to striding requirements.
+    new_data_processed = new_data_processed.astype(float_dtype)
+    new_data_processed = new_data_processed.copy()
+
     # Simply trains the dictionary. Does not return sparse code.
     # Need to look into generating the sparse code given the dictionary, spams.nmf? (may be too slow))
     new_dictionary = spams_sandbox.spams_sandbox.call_multiprocessing_array_spams_trainDL(new_data_processed,
                                                                                           **parameters["spams.trainDL"])
+
+    print("new_dictionary = " + repr(new_dictionary))
+    print("new_dictionary.shape = " + repr(new_dictionary.shape))
+    print("new_dictionary.dtype = " + repr(new_dictionary.dtype))
 
     # Fix dictionary so that the first index will be the particular image.
     # The rest will be the shape of an image (same as input shape).

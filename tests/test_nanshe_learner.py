@@ -15,7 +15,7 @@ import numpy
 import nanshe.expanded_numpy
 import nanshe.HDF5_recorder
 
-import synthetic_data.synthetic_data
+import synthetic_data
 
 import nanshe.nanshe_learner
 

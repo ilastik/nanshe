@@ -14,7 +14,7 @@ import nanshe.expanded_numpy
 
 import nanshe.advanced_image_processing
 
-import synthetic_data.synthetic_data
+import synthetic_data
 
 
 class TestAdvancedImageProcessing(object):
