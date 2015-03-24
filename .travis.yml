@@ -6,6 +6,8 @@ before_install:
    - deactivate
    - cd ../..
    - pwd
+   # Add temporary directory to the home folder for Travis CI to run DRMAA tests.
+   - mkdir ~/tmp
 install:
    # Download and extract the prebuilt binary.
    - wget -O nanshe-package.tgz https://www.dropbox.com/s/qhy2lhsk0ioge0p/nanshe-package.tgz?dl=0
