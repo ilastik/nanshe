@@ -20,15 +20,21 @@ install:
    - export BUILDEM_DIR=$(pwd)
    - echo "\$BUILDEM_DIR = ${BUILDEM_DIR}"
    - source $BUILDEM_DIR/bin/setenv_ilastik_gui.sh
+   # Won't recognize setup.cfg unless we are in the source directory.
+   - cd src/nanshe-git
+   # Install DRMAA with Python support.
+   - .travis_scripts/install_sge.sh
+   - export SGE_ROOT=/var/lib/gridengine
+   - export SGE_CELL=default
+   - export DRMAA_LIBRARY_PATH=/usr/lib/libdrmaa.so.1.0
+   - python $BUILDEM_DIR/bin/pip install drmaa
    # Install coverage and coveralls to generate and submit test coverage results for coveralls.io. Also, install docstring-coverage to get information about documentation coverage.
    - python $BUILDEM_DIR/bin/pip install coverage
    - python $BUILDEM_DIR/bin/pip install docstring-coverage
    - python $BUILDEM_DIR/bin/pip install python-coveralls
-   # Won't recognize setup.cfg unless we are in the source directory.
-   - cd src/nanshe-git
 script:
    # Run tests. Skip 3D tests as they take too long (~1hr).
-   - python $BUILDEM_DIR/bin/nosetests --with-coverage --cover-erase --cover-branches --cover-package=nanshe -a '!3D','!DRMAA'
+   - python $BUILDEM_DIR/bin/nosetests --with-coverage --cover-erase --cover-branches --cover-package=nanshe -a '!3D'
    # Build documentation.
    - cd docs
    # Unfortunately, this does not seem to work on TravisCI. This is because sphinx-apidoc cannot be found when in the Makefile. However, it is easily and correctly found right before the call. This may be related to a more general issue ( https://github.com/travis-ci/travis-ci/issues/3084 ). As a consequence, we will just copy code from the Makefile for now.
@@ -74,4 +80,4 @@ env:
    global:
        secure: gCN4vEn/1pKi+N9+00E8Ju+ImKpizdoblkSFnBr8TCXRWY4/iKM4yNkX/YtYsNwzh0eCq+840CXRYlcodG9nilG23RmubKZ1Y+T2fuFoEQbzE5QmPB7+fl01dlLpDbDtN6L7VSOtfjOj8BQGkdR9VwBMomseWgY37yuTnErfxeU=
 # Use container format for TravisCI to avoid termination due to insufficient resources.
-sudo: false
+#sudo: false
