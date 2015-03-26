@@ -72,7 +72,7 @@ def call_multiprocessing_queue_spams_trainDL(*args, **kwargs):
     p = multiprocessing.Process(target = run_multiprocessing_queue_spams_trainDL, args = (out_queue,) + args, kwargs = kwargs)
     p.start()
     result = out_queue.get()
-    result = result.copy()
+    result = result.copy(order='A')
     p.join()
 
     if p.exitcode != 0: raise SPAMSException("SPAMS has terminated with exitcode \"" + repr(p.exitcode) + "\".")
@@ -234,6 +234,6 @@ def call_spams_trainDL(*args, **kwargs):
     import spams
 
     result = spams.trainDL(*args, **kwargs)
-    result = result.copy()
+    result = result.copy(order='A')
 
     return(result)
